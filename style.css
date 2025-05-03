@@ -1,4 +1,4 @@
-    #Hello{
+#Hello{
         font-size:xx-large;
         font-family: Georgia, 'Times New Roman', Times, serif;
         color: green;
@@ -45,4 +45,14 @@ body{
     align-items: center;
     padding-left: 44%;
     color:green;
+}
+.rectangle{
+    width: 70vw;
+    height: 50vw;
+    background-color: green;
+    position: absolute;
+    top:40%;
+    left:30%;
+    transform: (-50%,-50%);
+
 }
