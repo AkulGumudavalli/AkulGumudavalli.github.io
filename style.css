@@ -39,7 +39,7 @@ body{
     background-color:rgba(246, 246, 161, 0.402);
 }
 :root{
-    --padding:20%;
+    --padding:20vh;
     --height:60%;
 }
 .check_boxes{
@@ -52,18 +52,19 @@ body{
 .rectangleleft{
     
     width: 40%;
-    position: absolute;
+    position: relative;
     top:var(--padding);
     left:10%;
-    transform: (-50%,-50%);
+    z-index: 0;
+
+    transform: (-50%,0);
     background-color: rgb(78, 201, 78);
     
     font-size: 1rem;
-    text-align: justify;       /* ← This justifies the text */
-    padding: 15px;             /* Space inside the rectangle */
+    text-align: justify;
+    padding: 15px;      
     border-radius: 8px;
-    box-sizing: border-box;    /* Ensures padding doesn't expand total width */
-    word-wrap: break-word;
+    box-sizing: border-box;    word-wrap: break-word;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     line-height: 1.8;
@@ -73,7 +74,14 @@ body{
 
 }
 .rectangleright{
+
     width: 40%;
+    position: relative;
+    bottom:23vh;
+    left:10%;
+    z-index: 999;
+    transform: (-50%,0);
+
     font-weight: bold;
     text-align: center;
     display: flex;
@@ -81,11 +89,34 @@ body{
     justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
-    height: var(--height);
+    height: 43vh;
+    transition: left 1s ease; 
     background-color: rgb(78, 201, 78);
-    position: absolute;
-    top:var(--padding);
-    left:50%;
-    transform: (-50%,-50%);
+   
+    
 
+}
+.moved{
+    width: 40%;
+    left:50%;
+    position: relative;
+    bottom:23vh;
+    z-index: 999;
+    transform: (-50%,0);
+
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    height: 43vh;
+    background-color: rgb(78, 201, 78);
+   
+}
+.image{
+    width: 80%;
+    height: auto;
+    border-radius: 8px;
 }
