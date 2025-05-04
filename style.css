@@ -77,7 +77,7 @@ body{
 
     width: 40%;
     position: relative;
-    bottom:23vh;
+    top:var(--padding);
     left:10%;
     z-index: 999;
     transform: (-50%,0);
@@ -89,7 +89,7 @@ body{
     justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
-    height: 43vh;
+    height: var(--height);
     transition: left 1s ease; 
     background-color: rgb(78, 201, 78);
    
@@ -100,7 +100,7 @@ body{
     width: 40%;
     left:50%;
     position: relative;
-    bottom:23vh;
+    bottom:var(--padding);
     z-index: 999;
     transform: (-50%,0);
 
@@ -111,7 +111,7 @@ body{
     justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
-    height: 43vh;
+    height: var(--height);
     background-color: rgb(78, 201, 78);
    
 }
