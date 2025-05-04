@@ -36,9 +36,12 @@ button{
 }
 
 body{
-    background-color:black;
+    background-color:rgba(246, 246, 161, 0.402);
 }
-
+:root{
+    --padding:20%;
+    --height:60%;
+}
 .check_boxes{
     display: flex;
     justify-content: center;
@@ -46,13 +49,43 @@ body{
     padding-left: 44%;
     color:green;
 }
-.rectangle{
-    width: 70vw;
-    height: 50vw;
-    background-color: green;
+.rectangleleft{
+    
+    width: 40%;
     position: absolute;
-    top:40%;
-    left:30%;
+    top:var(--padding);
+    left:10%;
+    transform: (-50%,-50%);
+    background-color: rgb(78, 201, 78);
+    
+    font-size: 1rem;
+    text-align: justify;       /* ← This justifies the text */
+    padding: 15px;             /* Space inside the rectangle */
+    border-radius: 8px;
+    box-sizing: border-box;    /* Ensures padding doesn't expand total width */
+    word-wrap: break-word;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    line-height: 1.8;
+    height: var(--height);
+
+
+
+}
+.rectangleright{
+    width: 40%;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    height: var(--height);
+    background-color: rgb(78, 201, 78);
+    position: absolute;
+    top:var(--padding);
+    left:50%;
     transform: (-50%,-50%);
 
 }
