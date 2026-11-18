@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A solar lamp for students in Uganda</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f1f4f2;--ink:#10262e;--mute:#566b72;--rule:#c9d5d7;--sun:#e39a00;color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0e1b21;--ink:#e9f0f2;--mute:#93a8af;--rule:#2a3d45;--sun:#f2b230}}
+:root[data-theme="dark"]{--paper:#0e1b21;--ink:#e9f0f2;--mute:#93a8af;--rule:#2a3d45;--sun:#f2b230}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--paper);color:var(--ink);font:400 17px/1.55 "Public Sans",system-ui,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:56px 24px 110px}
+h1,h2{font-family:"Young Serif",Georgia,serif;font-weight:400;margin:0}
+h1{font-size:clamp(2.5rem,7vw,5rem);line-height:1;letter-spacing:-.015em;max-width:12ch}
+h2{font-size:clamp(1.6rem,3.4vw,2.1rem);line-height:1.12;margin-bottom:12px}
+p{margin:0 0 14px;max-width:62ch}
+.verdict{font-size:1.2rem;line-height:1.5;margin-top:26px;max-width:58ch}
+dl.read{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 0;margin:52px 0 18px;padding:0}
+@media(min-width:700px){dl.read{grid-template-columns:repeat(4,1fr)}}
+dl.read div{padding-left:16px;border-left:2px solid var(--ink)}
+dt{font-size:14px;color:var(--mute)}
+dd{margin:0;font-size:2rem;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+canvas{display:block;width:100%;border-radius:4px}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px 36px;margin-top:18px;font-size:15px}
+.ctl label{display:grid;gap:4px}
+.ctl b{font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{accent-color:var(--ink);width:100%}
+select,button{font:500 15px "Public Sans",sans-serif;border-radius:3px;padding:9px 12px;color:var(--ink);background:var(--paper);border:1px solid var(--ink)}
+button{background:var(--ink);color:var(--paper);padding:10px 18px;cursor:pointer;justify-self:start}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+section{margin-top:120px}
+@media(min-width:900px){.split{display:grid;grid-template-columns:5fr 7fr;gap:56px}.pair{display:grid;grid-template-columns:7fr 5fr;gap:40px;align-items:start}}
+.pair{margin-top:24px}
+.fx{margin:0 0 26px;padding-left:16px;border-left:2px solid var(--rule)}
+.eq{font:400 1.2rem/1.6 "Young Serif",Georgia,serif}
+.eq var{font-style:italic}
+sub{font-size:.68em;line-height:0}
+.num{font-size:15px;color:var(--mute);font-variant-numeric:tabular-nums;margin-top:2px}
+.what{font-size:15px;margin:2px 0 0}
+.tw{overflow-x:auto;margin-top:22px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:15px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:500;color:var(--mute);font-size:14px;padding:0 14px 8px 0;border-bottom:1px solid var(--ink)}
+td{padding:9px 14px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+tr.on td{font-weight:600}
+.small{font-size:14px;color:var(--mute)}
+</style>
+</head>
+<body>
+<main>
+<h1>A solar lamp for students in Uganda</h1>
+<p class="verdict" id="vd"></p>
+
+<dl class="read">
+  <div><dt>Time</dt><dd id="tl">12:00 PM</dd></div>
+  <div><dt>Solar power</dt><dd id="sl">0 mW</dd></div>
+  <div><dt>Battery</dt><dd id="bl">0%</dd></div>
+  <div><dt>Light stored</dt><dd id="rl">0 hrs</dd></div>
+</dl>
+<canvas id="c" role="img" aria-label="Side and top view of the lamp at the chosen time"></canvas>
+<div class="ctl">
+  <label>Time of day <input type="range" id="ts" min="0" max="24" step="0.5" value="12"></label>
+  <button id="pb">Play a full day</button>
+  <label>Peak sun hours <b id="psv"></b><input type="range" id="ps" min="4" max="5.5" step="0.1" value="5.1"></label>
+  <label>Lamp power <b id="pwv"></b><input type="range" id="pw" min="0.1" max="0.5" step="0.05" value="0.2"></label>
+  <label>Hours lit each evening <b id="huv"></b><input type="range" id="hu" min="1" max="8" step="0.5" value="4"></label>
+  <label>Cloudy days to ride through <b id="dav"></b><input type="range" id="da" min="1" max="3" step="1" value="2"></label>
+</div>
+
+<section class="split">
+  <div>
+    <h2>Power from the panels</h2>
+    <div class="fx"><div class="eq"><var>G</var><sub>pk</sub> = π · <var>PSH</var> · 1000 / 24</div><div class="num" id="n1"></div><p class="what">Sunlight at noon, worked out from the day’s total.</p></div>
+    <div class="fx"><div class="eq"><var>P</var>(<var>t</var>) = <var>N</var> · <var>I</var><sub>stc</sub> · <var>V</var><sub>mp</sub> · <var>G</var>(<var>t</var>)/1000 · <var>s</var>(<var>t</var>)</div><div class="num" id="n2"></div><p class="what">Power from all panels at time <var>t</var>. <var>s</var> drops to 0.25 for panels facing away from the sun.</p></div>
+    <div class="fx"><div class="eq"><var>E</var><sub>day</sub> = η · <var>N</var> · <var>I</var><sub>stc</sub> · <var>V</var><sub>mp</sub> · <var>PSH</var> · <var>s̄</var></div><div class="num" id="n3"></div><p class="what">Energy that reaches the battery in one day. It is the area under the solid curve. <var>I</var><sub>stc</sub> and <var>V</var><sub>mp</sub> are estimates: a 68 × 37 mm, 5 V, 60 mA panel scaled by area to 0.663 × 1.468 in, since no shelf panel matches that size. <var>PSH</var> is 5.1 h/day for Uganda (about 4.2 west, 5.4 north).</p></div>
+  </div>
+  <div><canvas id="c1" height="320" role="img" aria-label="Panel power across 24 hours compared with the lamp's use"></canvas></div>
+</section>
+
+<section>
+  <h2>Sizing the battery</h2>
+  <p>Each point is a real 18650 cell with 1, 2 or 3 slots filled. The sloped lines are a best fit of pack energy against cell capacity. Filled points reach <var>E</var><sub>req</sub>, the dashed line, and hollow points fall short. Click a point to simulate that pack, and click it again to go back to the smallest pack that works.</p>
+  <div class="split">
+    <div>
+      <div class="fx"><div class="eq"><var>E</var><sub>night</sub> = <var>P</var><sub>led</sub> · <var>t</var><sub>use</sub></div><div class="num" id="n4"></div><p class="what">Energy the lamp uses in one evening.</p></div>
+      <div class="fx"><div class="eq"><var>E</var><sub>req</sub> = <var>E</var><sub>night</sub> · <var>D</var> · <var>A</var> / (DoD · η<sub>b</sub>)</div><div class="num" id="n5"></div><p class="what"><var>D</var> cloudy days of autonomy, <var>A</var> ageing margin, DoD usable depth of discharge, η<sub>b</sub> battery efficiency.</p></div>
+      <div class="fx"><div class="eq"><var>n</var> = ⌈ <var>E</var><sub>req</sub> / (<var>V</var> · <var>C</var> / 1000) ⌉</div><div class="num" id="n6"></div><p class="what">Cells needed, from the cell’s voltage <var>V</var> and capacity <var>C</var> in mAh.</p></div>
+      <div class="fx"><div class="eq"><var>k</var> = Σ<sub>rows</sub> ⌊ 2 √(<var>R</var>² − <var>y</var><sup>2</sup><sub>max</sub>) / <var>L</var> ⌋</div><div class="num" id="n7"></div><p class="what">Cells of length <var>L</var> that fit in the disc of radius <var>R</var>, row by row, outside the electronics bay. A cell must also be no thicker than the 19.5 mm height.</p></div>
+      <div class="fx"><div class="eq"><var>V</var><sub>mp</sub> ≥ <var>V</var><sub>cv</sub> + 0.5 V</div><div class="num" id="n9"></div><p class="what">The panel must reach the cell’s full-charge voltage with headroom. LiFePO4 cells need a 3.65 V charger, not a 4.2 V one.</p></div>
+    </div>
+    <div><canvas id="c2" height="340" role="img" aria-label="Pack energy against cell capacity for 1, 2 and 3 filled slots, with the needed energy marked"></canvas><canvas id="c4" role="img" aria-label="Which real cells reach the needed energy at each number of filled slots" style="margin-top:22px"></canvas></div>
+  </div>
+  <div class="pair"><div><p class="what">The bay is reserved for an Arduino Nano (45 × 18 mm), a LiFePO4 charger and a cell protection board, with room for wires.</p></div><canvas id="c3" height="260" role="img" aria-label="Top view of the housing with cells and the electronics bay"></canvas></div>
+</section>
+
+</main>
+
+<script>
+const N=6,ISTC=.015,VMP=5,ETA=.85,DOD=.8,ETAB=.9,AGE=1.2,R=60.96,H=19.48,BW=60,BH=40;
+const BT=Math.sqrt(R*R-(BW/2)*(BW/2))-BH; // top edge of bay along y
+const CELLS=[
+ {n:'LiFePO4',V:3.2,C:1500,d:18.4,L:65,cv:3.65},
+ {n:'Samsung 25R',V:3.6,C:2500,d:18.4,L:65,cv:4.2},
+ {n:'EVE 26V',V:3.6,C:2550,d:18.4,L:65,cv:4.2},
+ {n:'Sony VTC6',V:3.6,C:3000,d:18.4,L:65,cv:4.2},
+ {n:'Panasonic NCR-B',V:3.6,C:3400,d:18.5,L:65,cv:4.2},
+ {n:'Samsung 35E',V:3.6,C:3500,d:18.55,L:65.25,cv:4.2}
+];
+function pack(c){let best={k:0,rows:0,c0:0};if(c.d>H)return best;
+  for(let n=1;n<=Math.floor((BT+R)/c.d);n++){
+    const lo=-R+n*c.d/2,hi=BT-n*c.d/2,c0=Math.min(hi,Math.max(lo,0));let k=0,slots=[];
+    for(let i=0;i<n;i++){const top=c0-n*c.d/2+i*c.d,bot=top+c.d,ym=Math.max(Math.abs(top),Math.abs(bot));
+      if(ym<R){const cnt=Math.floor(2*Math.sqrt(R*R-ym*ym)/c.L);for(let j=0;j<cnt;j++)slots.push([(j-(cnt-1)/2)*c.L,top+c.d/2])}}
+    if(slots.length>best.k)best={k:slots.length,slots}}
+  return best}
+CELLS.forEach(c=>{const p=pack(c);c.k=p.k;c.slots=p.slots||[];c.wh=c.V*c.C/1000});
+const $=id=>document.getElementById(id),ts=$('ts');
+let hr=12,play=false,tmr,soc=0,state={},pick=null;
+const f=(v,d=2)=>v.toFixed(d),fmt=v=>Math.round(v).toLocaleString('en-US'),V=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function sun(h){const day=h>6&&h<18;return{day,elev:day?Math.sin((h-6)/12*Math.PI):0,ang:(h-6)/12*Math.PI}}
+function pf(i,s){return(s.day&&s.elev<.85&&Math.abs(Math.sin(i*Math.PI/3-s.ang))<.35)?.25:1}
+function Gpk(){return Math.PI*state.ps*1000/24}
+function mW(h,ideal){const s=sun(h);let a=0;for(let i=0;i<N;i++)a+=ideal?1:pf(i,s);return s.day?a*ISTC*VMP*1000*(Gpk()*s.elev/1000):0}
+function model(){
+  const g=id=>+$(id).value;state={ps:g('ps'),pw:g('pw'),hu:g('hu'),da:g('da')};
+  let a=0,b=0;for(let t=0;t<24;t+=.25){a+=mW(t);b+=mW(t,1)}state.sbar=b?a/b:1;
+  state.eday=ETA*N*ISTC*VMP*state.ps*state.sbar;state.enight=state.pw*state.hu;
+  state.ereq=state.enight*state.da*AGE/(DOD*ETAB);
+  let best=null;CELLS.forEach((c,i)=>{c.need=Math.ceil(state.ereq/c.wh);for(let n=1;n<=c.k;n++){const e=n*c.wh;if(e>=state.ereq&&(!best||e<best.e))best={i,n,e}}});
+  state.best=best;
+  const pi=pick&&CELLS[pick.i]?pick.i:(best?best.i:CELLS.length-1),pn=pick?pick.n:(best?best.n:CELLS[pi].k);
+  state.ci=pi;state.n=pn;state.cap=pn*CELLS[pi].wh;
+}
+function sceneDraw(){
+  const c=$('c'),ctx=c.getContext('2d'),d=Math.max(devicePixelRatio||1,1);c.width=660*d;c.height=330*d;c.style.aspectRatio='2/1';ctx.setTransform(d,0,0,d,0,0);
+  const s=sun(hr),day=s.day,elev=s.elev,ang=s.ang,pct=Math.max(0,Math.min(100,soc/state.cap*100)),lit=hr>=18&&hr<18+state.hu&&soc>0,F="'Public Sans',sans-serif",sc='#e39a00';
+  ctx.fillStyle=day?'#d8e4e8':'#0d2129';ctx.fillRect(0,0,660,330);
+  ctx.fillStyle=day?'#10262e':'#e9f0f2';ctx.font='600 13px '+F;ctx.textAlign='left';ctx.fillText('Side view',16,24);ctx.fillText('Top view',346,24);
+  ctx.strokeStyle=day?'#b3c4ca':'#24404a';ctx.beginPath();ctx.moveTo(330,0);ctx.lineTo(330,330);ctx.stroke();
+  if(day){ctx.fillStyle=sc;ctx.beginPath();ctx.arc(165-Math.cos(ang)*120,120-elev*80,12,0,7);ctx.fill()}
+  ctx.fillStyle=day?'#10262e':'#2c4954';ctx.fillRect(75,240,180,55);
+  ctx.fillStyle='#d8e4e8';ctx.fillRect(130,258,70,18);ctx.fillStyle=sc;ctx.fillRect(130,258,70*pct/100,18);
+  ctx.fillStyle=day?'#2f6f9f':'#16394a';ctx.fillRect(80,234,170,6);
+  ctx.fillStyle=day?'#10262e':'#8aa0a8';ctx.fillRect(105,105,8,125);ctx.fillRect(217,105,8,125);ctx.fillRect(100,93,130,12);ctx.fillRect(156,48,18,45);
+  if(lit){ctx.fillStyle='rgba(255,214,107,.35)';ctx.beginPath();ctx.arc(165,190,55,0,7);ctx.fill()}
+  ctx.fillStyle=lit?'#ffd66b':'#5b727a';ctx.beginPath();ctx.arc(165,226,12,Math.PI,0);ctx.fill();
+  ctx.fillStyle=day?'#10262e':'#2c4954';ctx.beginPath();ctx.arc(495,175,110,0,7);ctx.fill();
+  for(let i=0;i<N;i++){ctx.save();ctx.translate(495,175);ctx.rotate(i*Math.PI/3);ctx.fillStyle=!day?'#16394a':(pf(i,s)<1?'#8fa6b3':'#2f8fd0');ctx.fillRect(32,-10,66,20);ctx.restore()}
+  if(lit){ctx.fillStyle='rgba(255,214,107,.4)';ctx.beginPath();ctx.arc(495,175,45,0,7);ctx.fill()}
+  ctx.fillStyle=lit?'#ffd66b':'#5b727a';ctx.beginPath();ctx.arc(495,175,18,0,7);ctx.fill();
+  if(day){ctx.fillStyle=sc;ctx.beginPath();ctx.arc(495+Math.cos(ang+Math.PI)*128,175+Math.sin(ang+Math.PI)*128,10,0,7);ctx.fill()}
+}
+function text(){
+  const c=CELLS[state.ci],S=state;
+  $('psv').textContent=f(S.ps,1)+' h';$('pwv').textContent=f(S.pw)+' W';$('huv').textContent=f(S.hu,1)+' h';$('dav').textContent=S.da;
+  $('vd').textContent='Six panels store about '+f(S.eday)+' Wh on an average day. A '+f(S.pw)+' W lamp lit for '+f(S.hu,1)+' hours uses '+f(S.enight)+' Wh, so the panels cover it '+f(S.eday/S.enight,1)+' times over. '+
+    (S.best?'The smallest pack that meets the battery requirement is '+S.best.n+' × '+CELLS[S.best.i].n+', holding '+f(S.best.e)+' Wh.':'No pack of these cells meets the battery requirement inside the housing.');
+  const Gp=Gpk();
+  $('n1').textContent='= π × '+f(S.ps,1)+' × 1000 / 24 = '+Math.round(Gp)+' W/m²';
+  $('n2').textContent='peak, unshaded: '+N+' × '+ISTC+' A × '+VMP+' V × '+f(Gp/1000)+' = '+Math.round(N*ISTC*VMP*Gp)+' mW';
+  $('n3').textContent='= '+ETA+' × '+N+' × '+ISTC+' A × '+VMP+' V × '+f(S.ps,1)+' h × '+f(S.sbar)+' = '+f(S.eday)+' Wh';
+  $('n4').textContent='= '+f(S.pw)+' W × '+f(S.hu,1)+' h = '+f(S.enight)+' Wh';
+  $('n5').textContent='= '+f(S.enight)+' × '+S.da+' × '+AGE+' / ('+DOD+' × '+ETAB+') = '+f(S.ereq)+' Wh';
+  $('n6').textContent=c.n+': ⌈ '+f(S.ereq)+' / '+f(c.wh)+' ⌉ = '+c.need+' cell'+(c.need>1?'s':'')+'. Simulating '+S.n+' installed.';
+  $('n7').textContent='with the 60 × 40 mm bay reserved: k = '+c.k+' cells'+(c.ok?', so it fits':', so it does not fit');
+  $('n9').textContent='= '+VMP+' V ≥ '+c.cv+' V + 0.5 V = '+f(c.cv+.5,2)+' V, '+(VMP>=c.cv+.5?'met':'not met');
+  const h=Math.floor(hr)%24,m=hr%1?'30':'00';
+  $('tl').textContent=(h%12||12)+':'+m+(h>=12?' PM':' AM');$('sl').textContent=Math.round(mW(hr))+' mW';
+  $('bl').textContent=Math.round(Math.max(0,Math.min(100,soc/S.cap*100)))+'%';$('rl').textContent=f(soc/S.pw,1)+' hrs';
+}
+function draw(){hr=parseFloat(ts.value);model();if(!soc||soc>state.cap)soc=Math.min(state.cap,soc||state.cap*.5);sceneDraw();text();c1();c2();c4();c3()}
+function lit(h){return h>=18&&h<18+state.hu}
+function step(){hr=(hr+.5)%24;ts.value=hr;model();soc=Math.min(state.cap,soc+ETA*mW(hr)/1000*.5);if(lit(hr))soc=Math.max(0,soc-state.pw*.5);draw()}
+$('pb').onclick=()=>{play=!play;$('pb').textContent=play?'Pause':'Play a full day';if(play)tmr=setInterval(step,300);else clearInterval(tmr)};
+['ts','ps','pw','hu','da'].forEach(id=>$(id).oninput=()=>{if(id!=='ts')soc=0;draw()});
+
+function setup(cv,h){const d=devicePixelRatio||1,w=cv.clientWidth;cv.height=h*d;cv.width=w*d;const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h}}
+const FN="'Public Sans',sans-serif";
+function c1(){
+  const{x,w,h}=setup($('c1'),320),L=48,Rr=10,T=16,B=32,pw=w-L-Rr,ph=h-T-B,S=state;
+  let ym=Math.max(...Array.from({length:97},(_,i)=>mW(i/4,1)),S.pw*1000)*1.15;ym=Math.ceil(ym/100)*100;
+  const X=t=>L+pw*t/24,Y=v=>T+ph*(1-v/ym),ink=V('--ink'),mute=V('--mute'),rule=V('--rule'),sc=V('--sun');
+  x.font='12px '+FN;
+  for(let i=0;i<=4;i++){const v=ym*i/4;x.strokeStyle=rule;x.lineWidth=1;x.beginPath();x.moveTo(L,Y(v));x.lineTo(w-Rr,Y(v));x.stroke();x.fillStyle=mute;x.textAlign='right';x.fillText(Math.round(v)+(i==4?' mW':''),L-8,Y(v)+4)}
+  x.textAlign='center';['12 am','6 am','noon','6 pm','12 am'].forEach((t,i)=>x.fillText(t,X(i*6),h-10));
+  // lamp use
+  x.fillStyle=ink;x.globalAlpha=.12;x.fillRect(X(18),Y(S.pw*1000),X(18+S.hu)-X(18),Y(0)-Y(S.pw*1000));x.globalAlpha=1;
+  x.strokeStyle=ink;x.lineWidth=1.5;x.strokeRect(X(18),Y(S.pw*1000),X(18+S.hu)-X(18),Y(0)-Y(S.pw*1000));
+  x.setLineDash([5,4]);x.strokeStyle=mute;x.beginPath();for(let t=0;t<=24;t+=.25)t?x.lineTo(X(t),Y(mW(t,1))):x.moveTo(X(t),Y(mW(t,1)));x.stroke();x.setLineDash([]);
+  x.beginPath();x.moveTo(X(0),Y(0));for(let t=0;t<=24;t+=.25)x.lineTo(X(t),Y(mW(t)));x.lineTo(X(24),Y(0));x.globalAlpha=.28;x.fillStyle=sc;x.fill();x.globalAlpha=1;
+  x.strokeStyle=sc;x.lineWidth=3;x.beginPath();for(let t=0;t<=24;t+=.25)t?x.lineTo(X(t),Y(mW(t))):x.moveTo(X(t),Y(mW(t)));x.stroke();
+  x.strokeStyle=ink;x.lineWidth=1;x.beginPath();x.moveTo(X(hr),T);x.lineTo(X(hr),T+ph);x.stroke();
+  x.fillStyle=sc;x.lineWidth=2;x.beginPath();x.arc(X(hr),Y(mW(hr)),5.5,0,7);x.fill();x.stroke();
+  x.fillStyle=ink;x.textAlign='left';x.font='500 12px '+FN;x.fillText('Solid: panels with shading. Dashed: no shading.',L+8,T+14);x.fillText('Box: lamp use, '+f(S.enight)+' Wh',L+8,T+30);
+}
+let pts=[],mrows=[];
+function fitLine(){const n=CELLS.length,mx=CELLS.reduce((a,c)=>a+c.C,0)/n,my=CELLS.reduce((a,c)=>a+c.wh,0)/n;let sxy=0,sxx=0;CELLS.forEach(c=>{sxy+=(c.C-mx)*(c.wh-my);sxx+=(c.C-mx)**2});const b=sxy/sxx;return{a:my-b*mx,b}}
+function c2(){
+  const{x,w,h}=setup($('c2'),340),L=48,Rr=70,T=26,B=44,pw=w-L-Rr,ph=h-T-B,S=state,ft=fitLine(),km=Math.max(...CELLS.map(c=>c.k)),ink=V('--ink'),mute=V('--mute'),rule=V('--rule'),sc=V('--sun'),paper=V('--paper');
+  const x0=1000,x1=3700,ym=Math.ceil(Math.max(km*Math.max(...CELLS.map(c=>c.wh)),S.ereq)*1.08/5)*5,X=v=>L+pw*(v-x0)/(x1-x0),Y=v=>T+ph*(1-v/ym);
+  x.font='12px '+FN;x.textBaseline='alphabetic';
+  for(let i=0;i<=5;i++){const v=ym*i/5;x.strokeStyle=rule;x.lineWidth=1;x.beginPath();x.moveTo(L,Y(v));x.lineTo(L+pw,Y(v));x.stroke();x.fillStyle=mute;x.textAlign='right';x.fillText(Math.round(v),L-8,Y(v)+4)}
+  x.textAlign='center';for(let v=1000;v<=3500;v+=500)x.fillText(fmt(v),X(v),h-24);
+  x.fillStyle=ink;x.font='500 12px '+FN;x.fillText('Cell capacity (mAh)',L+pw/2,h-6);x.textAlign='left';x.fillText('Pack energy (Wh)',2,12);
+  x.save();x.beginPath();x.rect(L,T-4,pw+Rr,ph+8);x.clip();
+  for(let n=1;n<=km;n++){x.strokeStyle=mute;x.lineWidth=1.5;x.beginPath();x.moveTo(X(x0),Y(n*(ft.a+ft.b*x0)));x.lineTo(X(x1),Y(n*(ft.a+ft.b*x1)));x.stroke();
+    x.fillStyle=mute;x.textAlign='left';x.font='12px '+FN;x.fillText(n+(n==1?' slot':' slots'),X(x1)+6,Math.max(T+8,Y(n*(ft.a+ft.b*x1))+4))}
+  x.restore();
+  x.setLineDash([6,4]);x.strokeStyle=sc;x.lineWidth=2.5;x.beginPath();x.moveTo(L,Y(S.ereq));x.lineTo(L+pw,Y(S.ereq));x.stroke();x.setLineDash([]);
+  x.fillStyle=ink;x.font='600 12px '+FN;x.textAlign='left';x.fillText('Needed '+f(S.ereq,1)+' Wh',L+6,Y(S.ereq)-7);
+  pts=[];CELLS.forEach((c,i)=>{for(let n=1;n<=c.k;n++){const px=X(c.C),py=Y(n*c.wh),reach=n*c.wh>=S.ereq,ch=i===S.ci&&n===S.n;
+    x.beginPath();x.arc(px,py,ch?8:5.5,0,7);x.fillStyle=reach?ink:paper;x.fill();x.strokeStyle=reach?ink:mute;x.lineWidth=2;x.stroke();
+    if(ch){x.beginPath();x.arc(px,py,11,0,7);x.strokeStyle=sc;x.lineWidth=3;x.stroke()}
+    pts.push([px,py,i,n])}});
+}
+function c4(){
+  const n=CELLS.length,km=Math.max(...CELLS.map(c=>c.k)),rh=46,hd=30,{x,w}=setup($('c4'),hd+n*rh+4),S=state,ink=V('--ink'),mute=V('--mute'),sc=V('--sun'),paper=V('--paper');
+  const lw=Math.min(190,w*.46),cw=(w-lw)/km;mrows=[];x.textBaseline='alphabetic';
+  x.font='500 12px '+FN;x.fillStyle=mute;x.textAlign='center';for(let j=0;j<km;j++)x.fillText((j+1)+(j?' slots':' slot'),lw+cw*(j+.5),18);
+  CELLS.forEach((c,i)=>{const y=hd+i*rh;x.textAlign='left';x.fillStyle=ink;x.font=(i===S.ci?'600 ':'500 ')+'14px '+FN;x.fillText(c.n,0,y+19);
+    x.font='12px '+FN;x.fillStyle=mute;x.fillText(c.V+' V, '+fmt(c.C)+' mAh',0,y+36);
+    for(let n2=1;n2<=c.k;n2++){const e=n2*c.wh,ok=e>=S.ereq,px=lw+cw*(n2-1)+5,py=y+8,pw=cw-10,ph=30,ch=i===S.ci&&n2===S.n;
+      x.beginPath();x.roundRect(px,py,pw,ph,4);if(ok){x.fillStyle=ink;x.fill()}else{x.strokeStyle=mute;x.lineWidth=1.5;x.stroke()}
+      if(ch){x.beginPath();x.roundRect(px-2,py-2,pw+4,ph+4,6);x.strokeStyle=sc;x.lineWidth=3;x.stroke()}
+      x.fillStyle=ok?paper:mute;x.textAlign='center';x.font='600 13px '+FN;x.fillText(f(e,1)+' Wh',px+pw/2,py+19);
+      mrows.push([px,py,px+pw,py+ph,i,n2])}});
+}
+function choose(i,n){pick=(pick&&pick.i===i&&pick.n===n)?null:{i,n};soc=0;draw()}
+$('c2').addEventListener('click',e=>{const r=e.target.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;let b=null,bd=16;pts.forEach(p=>{const d=Math.hypot(p[0]-px,p[1]-py);if(d<bd){bd=d;b=p}});if(b)choose(b[2],b[3])});
+$('c4').addEventListener('click',e=>{const r=e.target.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,b=mrows.find(m=>px>=m[0]&&px<=m[2]&&py>=m[1]&&py<=m[3]);if(b)choose(b[4],b[5])});
+function c3(){
+  const{x,w,h}=setup($('c3'),260),c=CELLS[state.ci],sc=(h-16)/(2*R),cx=R*sc+8,cy=h/2,ink=V('--ink'),mute=V('--mute'),sun_=V('--sun');
+  x.strokeStyle=mute;x.lineWidth=2;x.beginPath();x.arc(cx,cy,R*sc,0,7);x.stroke();
+  x.setLineDash([5,4]);x.strokeStyle=sun_;x.lineWidth=2;x.strokeRect(cx-BW/2*sc,cy+BT*sc,BW*sc,BH*sc);x.setLineDash([]);
+  x.fillStyle=ink;x.font='11px '+FN;x.textAlign='center';x.fillText('Arduino, charger, protection',cx,cy+(BT+BH/2)*sc+4);
+  c.slots.forEach(([xo,yo],i)=>{const rx=cx+(xo-c.L/2)*sc,ry=cy+(yo-c.d/2)*sc;
+    if(i<state.n){x.fillStyle=ink;x.beginPath();x.roundRect(rx,ry,c.L*sc-2,c.d*sc-2,3);x.fill()}
+    else{x.strokeStyle=mute;x.lineWidth=1;x.setLineDash([3,3]);x.beginPath();x.roundRect(rx,ry,c.L*sc-2,c.d*sc-2,3);x.stroke();x.setLineDash([])}});
+  const tx=cx+R*sc+16;x.textAlign='left';
+  if(w-tx>90){x.fillStyle=ink;x.font='600 14px '+FN;x.fillText(state.n+' of '+c.k+' slots used',tx,cy-8);x.font='13px '+FN;x.fillStyle=mute;x.fillText('Dashed cells are spare room',tx,cy+12);x.fillText('Disc 4.8 in across, 0.767 in tall',tx,cy+32)}
+}
+addEventListener('resize',draw);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+draw();
+</script>
+</body>
+</html>
